@@ -2,6 +2,7 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import YTSearch from 'youtube-api-search';
+import _ from 'lodash';
 
 // Components
 import SearchBar from './components/search_bar';
@@ -19,11 +20,17 @@ class App extends Component {
 
         this.state = {
             videos: [],
-            selectedVideo: null
+            selectedVideo: null,
         };
 
+        this.videoSearch('puppies');
+
+    }
+
+    videoSearch(term) {
+
         // Go grab videos and set up our state object
-        YTSearch({key: API_KEY, term: 'puppies'}, videos => {
+        YTSearch({key: API_KEY, term: term}, videos => {
             this.setState({ 
                 videos, 
                 selectedVideo: videos[0] 
@@ -33,9 +40,13 @@ class App extends Component {
     }
     
     render() {
+
+        // Throttle our search 
+        const videoSearch = _.debounce((term) => {this.videoSearch(term)}, 300);
+
         return (
             <div>
-                <SearchBar />
+                <SearchBar onSearchTermChange={videoSearch} />
                 <VideoDetail video={this.state.selectedVideo} />
                 <VideoList 
                     onVideoSelect={ selectedVideo => this.setState({selectedVideo}) }
